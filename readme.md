@@ -3,6 +3,7 @@
 **A low-cost Tree/Plant Vitality Monitoring System built on the ESP32-C6.**
 
 TreeVital goes beyond a simple sensor dashboard. Instead of just showing raw soil moisture, light, temperature and humidity readings, it interprets them into a small set of easy-to-read scores — an overall **Tree Vitality Index**, a **Thirst Index**, a **Stress Index**, a **Trend**, and a plain-language **Status** — displayed locally on an OLED and pushed live to a Blynk dashboard.
+<img width="1634" height="822" alt="Screenshot (129)" src="https://github.com/user-attachments/assets/bb6de87c-64f4-497e-8815-57964b092ef0" />
 
 ---
 
