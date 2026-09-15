@@ -1,6 +1,24 @@
-#define BLYNK_TEMPLATE_ID   "your_template_id"
+/* ============================================================
+   TREEVITAL - Tree Vitality Monitoring System
+   Board: ESP32-C6 (any DevKit variant)
+
+   Sensors wired:      FC-28 soil moisture (AO) -> GPIO2
+                        LDR / photoresistor      -> GPIO3
+                        DHT11 (temp/humidity)    -> GPIO21
+   Outputs wired:      Green LED -> GPIO18, Red LED -> GPIO19
+                        Buzzer    -> GPIO20
+                        OLED (I2C SSD1306) SDA -> GPIO22, SCL -> GPIO23
+
+   DHT11 is active (USE_DHT11 = true). Its readings feed the Stress Index
+   and are printed to Serial Monitor only - OLED, Blynk, LEDs, and buzzer
+   are unaffected by this change and keep working exactly as before.
+   ============================================================ */
+
+// ---------------- Blynk credentials ----------------
+// Get these from your Blynk.Cloud template (see setup guide)
+#define BLYNK_TEMPLATE_ID   "YOUR_TEMPLATE_ID"
 #define BLYNK_TEMPLATE_NAME "TreeVital"
-#define BLYNK_AUTH_TOKEN    "your_auth_token"
+#define BLYNK_AUTH_TOKEN    "YOUR_AUTH_TOKEN"
 
 #include <WiFi.h>
 #include <BlynkSimpleEsp32.h>
@@ -8,15 +26,15 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-char ssid[] = "your_wifi_ssid";
-char pass[] = "your_wifi_password";
+char ssid[] = "YOUR_WIFI_SSID";
+char pass[] = "YOUR_WIFI_PASSWORD";
 
-// ---------------- DHT11 INTEGRATION: step 1 ----------------
+// ---------------- DHT11 (temperature + humidity) ----------------
 #include <DHT.h>
 #define DHT_PIN 21
 #define DHT_TYPE DHT11
 DHT dht(DHT_PIN, DHT_TYPE);
-bool USE_DHT11 = false;
+bool USE_DHT11 = true;
 // -------------------------------------------------------------
 
 // ---------------- Pin assignments ----------------
@@ -144,7 +162,7 @@ void setup() {
   }
 
   // ---------------- DHT11 INTEGRATION: step 2 ----------------
-  // if (USE_DHT11) dht.begin();
+  if (USE_DHT11) dht.begin();
   // -------------------------------------------------------------
 
   Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
@@ -211,12 +229,16 @@ void sendData() {
   // ---- DHT11 INTEGRATION: step 3 ----
   float tempC = TEMP_MIN_GOOD + (TEMP_MAX_GOOD - TEMP_MIN_GOOD) / 2; // neutral placeholder
   float humPct = HUM_MIN_GOOD + (HUM_MAX_GOOD - HUM_MIN_GOOD) / 2;   // neutral placeholder
-  // if (USE_DHT11) {
-  //   float t = dht.readTemperature();
-  //   float h = dht.readHumidity();
-  //   if (!isnan(t)) tempC = t;
-  //   if (!isnan(h)) humPct = h;
-  // }
+  if (USE_DHT11) {
+    float t = dht.readTemperature();
+    float h = dht.readHumidity();
+    if (!isnan(t)) tempC = t;
+    if (!isnan(h)) humPct = h;
+    // Serial-only, as requested - not shown on OLED/Blynk/LEDs/buzzer.
+    Serial.print("RAW DHT11 temp="); Serial.print(tempC);
+    Serial.print("C  humidity="); Serial.print(humPct);
+    Serial.println("%");
+  }
   // ------------------------------------
 
   // ---- Individual stress scores (0-100) ----
